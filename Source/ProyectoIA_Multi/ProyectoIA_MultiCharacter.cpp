@@ -10,7 +10,38 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "DrawDebugHelpers.h"
 #include "ProyectoIA_Multi.h"
+#include "GameFramework/PlayerState.h"
+#include "ProyectoIA_MultiPlayerController.h"
+
+namespace
+{
+	const TCHAR* NetModeToString(const ENetMode NetMode)
+	{
+		switch (NetMode)
+		{
+		case NM_Standalone:
+			return TEXT("Standalone");
+
+
+		case NM_DedicatedServer:
+			return TEXT("DedicatedServer");
+
+
+		case NM_ListenServer:
+			return TEXT("ListenServer");
+
+
+		case NM_Client:
+			return TEXT("Client");
+
+
+		default:
+			return TEXT("Unknown");
+		}
+	}
+}
 
 AProyectoIA_MultiCharacter::AProyectoIA_MultiCharacter()
 {
@@ -48,6 +79,34 @@ AProyectoIA_MultiCharacter::AProyectoIA_MultiCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+}
+
+void AProyectoIA_MultiCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	const ENetMode NetMode = GetNetMode();
+
+	const FString Label = FString::Printf(
+		TEXT("%s | %s | Local=%s"),
+		NetModeToString(NetMode),
+		*UEnum::GetValueAsString(GetLocalRole()),
+		IsLocallyControlled() ? TEXT("true") : TEXT("false")
+	);
+
+
+	if (NetMode != NM_DedicatedServer)
+	{
+		DrawDebugString(
+			GetWorld(),
+			FVector(0.0, 0.0, 120.0),
+			Label,
+			this,
+			IsLocallyControlled() ? FColor::Green : FColor::Cyan,
+			60.0f,
+			true
+		);
+	}
 }
 
 void AProyectoIA_MultiCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -130,4 +189,42 @@ void AProyectoIA_MultiCharacter::DoJumpEnd()
 {
 	// signal the character to stop jumping
 	StopJumping();
+}
+
+void AProyectoIA_MultiCharacter::OnDestroy()
+{
+	if (CurrentPS)
+	{
+		CurrentPS->SetScore(CurrentPS->GetScore() + 1.0f);
+	}
+
+	if (!IsLocallyControlled()) return;
+
+	if (AProyectoIA_MultiPlayerController* PC = Cast<AProyectoIA_MultiPlayerController>(GetController()))
+	{
+		PC->Server_SolicitarRespawn();
+	}
+}
+
+void AProyectoIA_MultiCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	APlayerState* PS = GetPlayerState();
+	if (PS && IsLocallyControlled())
+	{
+		CurrentPS = PS;
+		UE_LOG(LogTemp, Display, TEXT("Player: %d, Score : %f"), CurrentPS->GetPlayerId(), CurrentPS->GetScore());
+	}
+}
+
+void AProyectoIA_MultiCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	CurrentPS = GetPlayerState();
+	if (CurrentPS && IsLocallyControlled())
+	{
+		UE_LOG(LogTemp, Display, TEXT("Player: %d, Score : %f"), CurrentPS->GetPlayerId(), CurrentPS->GetScore());
+	}
 }

@@ -8,6 +8,26 @@
 #include "Blueprint/UserWidget.h"
 #include "ProyectoIA_Multi.h"
 #include "Widgets/Input/SVirtualJoystick.h"
+#include "GameFramework/GameModeBase.h"
+
+AProyectoIA_MultiPlayerController::AProyectoIA_MultiPlayerController()
+{
+}
+
+void AProyectoIA_MultiPlayerController::Server_SolicitarRespawn_Implementation()
+{
+	APawn* ControlledPawn = GetPawn();
+	if (ControlledPawn)
+	{
+		ControlledPawn->Destroy();
+	}
+
+	AGameModeBase* GM = GetWorld()->GetAuthGameMode();
+	if (GM)
+	{
+		GM->RestartPlayer(this);
+	}
+}
 
 void AProyectoIA_MultiPlayerController::BeginPlay()
 {

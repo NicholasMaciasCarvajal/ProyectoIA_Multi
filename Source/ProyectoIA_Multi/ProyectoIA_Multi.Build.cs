@@ -18,8 +18,15 @@ public class ProyectoIA_Multi : ModuleRules
 			"StateTreeModule",
 			"GameplayStateTreeModule",
 			"UMG",
-			"Slate"
-		});
+			"Slate",
+            "GameplayAbilities",
+            "GameplayTags",
+            "GameplayTasks",
+			"OnlineSubsystem",
+            "OnlineSubsystemUtils",
+        });
+
+		DynamicallyLoadedModuleNames.Add("OnlineSubsystemSteam");
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
 

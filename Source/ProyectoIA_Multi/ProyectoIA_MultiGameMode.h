@@ -14,6 +14,8 @@ class AProyectoIA_MultiGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
+	virtual void BeginPlay() override;
+
 public:
 	
 	/** Constructor */

@@ -18,6 +18,13 @@ class AProyectoIA_MultiPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
+public: 
+	/** Constructor */
+	AProyectoIA_MultiPlayerController();
+
+	UFUNCTION(Server, Reliable)
+	void Server_SolicitarRespawn();
+
 protected:
 
 	/** Input Mapping Contexts */
