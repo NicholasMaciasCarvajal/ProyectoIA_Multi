@@ -4,7 +4,7 @@
 #include "AIController.h"
 #include "CustomAIController.generated.h"
 
-class UStateTreeComponent;
+class UStateTreeAIComponent;
 
 /**
  *
@@ -15,8 +15,15 @@ class PROYECTOIA_MULTI_API ACustomAIController : public AAIController
 	GENERATED_BODY()
 public:
 	ACustomAIController();
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IA")
+	FVector CoverLocation = FVector::ZeroVector;
+
 private:
 protected:
+	virtual void OnPossess(APawn* InPawn) override;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IA")
-	TObjectPtr<UStateTreeComponent> StateTreeComponent;
+	TObjectPtr<UStateTreeAIComponent> StateTreeComponent;
 };
